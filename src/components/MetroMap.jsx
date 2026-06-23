@@ -2,7 +2,15 @@ import { useMemo } from 'react';
 import { ORDER, COORDS, BANGLA } from '../data.js';
 
 const VB = '160 18 760 1716';
-const OFF = 9; // perpendicular offset so the two directions ride opposite sides
+// perpendicular offset so the two directions ride opposite sides of the line:
+// southbound (Uttara North -> Motijheel) rides Platform 2 / right side,
+// northbound (Motijheel -> Uttara North) rides Platform 1 / left side.
+const OFF = -9;
+
+// offset a point (x,y) perpendicular to heading `rad`, by `off` units
+function sideOffset(x, y, rad, off) {
+  return [x - Math.sin(rad) * off, y + Math.cos(rad) * off];
+}
 
 const LBL = (() => {
   const o = {};
@@ -26,8 +34,9 @@ function Label({ n, x, y, cfg }) {
 
 function Train({ t, dir }) {
   const rad = t.angle * Math.PI / 180;
-  const x = (t.x - Math.sin(rad) * OFF).toFixed(1);
-  const y = (t.y + Math.cos(rad) * OFF).toFixed(1);
+  const [ox, oy] = sideOffset(t.x, t.y, rad, OFF);
+  const x = ox.toFixed(1);
+  const y = oy.toFixed(1);
   const col = dir === 'south' ? '#E76F2A' : '#2563EB';
   return (
     <g transform={`translate(${x},${y}) rotate(${t.angle.toFixed(1)})`}>
@@ -98,6 +107,22 @@ export default function MetroMap({ southT, northT, myMarker }) {
         );
       })}
       {ORDER.map((n, i) => <Label key={'l' + n} n={n} x={P[i][0]} y={P[i][1]} cfg={LBL[n]} />)}
+
+      {/* platform indicator at the Uttara North terminal: 1 left, 2 right */}
+      {(() => {
+        const a = COORDS['Uttara North'], b = COORDS['Uttara Center'];
+        const rad = Math.atan2(b[1] - a[1], b[0] - a[0]);
+        const [p1x] = sideOffset(a[0], a[1], rad, -OFF);
+        const [p2x] = sideOffset(a[0], a[1], rad, OFF);
+        return (
+          <g>
+            <line x1={p1x} y1={26} x2={p1x} y2={58} stroke="#2563EB" strokeWidth={2} strokeDasharray="2 2" />
+            <line x1={p2x} y1={26} x2={p2x} y2={58} stroke="#E76F2A" strokeWidth={2} strokeDasharray="2 2" />
+            <text x={p1x - 4} y={22} textAnchor="end" fontSize="10" fontWeight="700" fill="#2563EB">Platform 1</text>
+            <text x={p2x + 4} y={22} textAnchor="start" fontSize="10" fontWeight="700" fill="#E76F2A">Platform 2</text>
+          </g>
+        );
+      })()}
 
       {/* trains */}
       <g>

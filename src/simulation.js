@@ -117,3 +117,21 @@ export function activeTrains(deps, stops, nowMin) {
   }
   return out;
 }
+
+// The fleet has 24 six-coach sets; ~14 are in passenger service at once.
+// If the timetable replay would put more than that on the line at the same
+// moment, only the longest-running ones (closest to finishing their trip)
+// keep a slot — newer departures wait for one to free up before they "show".
+export function capFleet(southT, northT, max = 14) {
+  const combined = [
+    ...southT.map((t) => ({ t, dir: 'south' })),
+    ...northT.map((t) => ({ t, dir: 'north' })),
+  ];
+  if (combined.length <= max) return { south: southT, north: northT };
+  combined.sort((a, b) => a.t.dep - b.t.dep);
+  const kept = new Set(combined.slice(0, max).map((c) => c.dir + '|' + c.t.dep));
+  return {
+    south: southT.filter((t) => kept.has('south|' + t.dep)),
+    north: northT.filter((t) => kept.has('north|' + t.dep)),
+  };
+}

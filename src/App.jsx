@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  dhakaNow, resolveDayType, getDeps, activeTrains,
+  dhakaNow, resolveDayType, getDeps, activeTrains, capFleet,
   southStops, northStops,
 } from './simulation.js';
 import { projectToRoute, metersToPx } from './geo.js';
@@ -11,6 +11,9 @@ import Controls from './components/Controls.jsx';
 import TrainList from './components/TrainList.jsx';
 import NextDepartures from './components/NextDepartures.jsx';
 import Legend from './components/Legend.jsx';
+import FleetInfo from './components/FleetInfo.jsx';
+
+const MAX_FLEET = 14;
 
 export default function App() {
   const [live, setLive] = useState(true);
@@ -34,8 +37,11 @@ export default function App() {
   const dayType = useMemo(() => resolveDayType(now, dayOverride), [now.iso, now.dow, dayOverride]);
   const depSouth = useMemo(() => getDeps(dayType, 'south'), [dayType]);
   const depNorth = useMemo(() => getDeps(dayType, 'north'), [dayType]);
-  const southT = useMemo(() => activeTrains(depSouth, southStops, nowMin), [depSouth, nowMin]);
-  const northT = useMemo(() => activeTrains(depNorth, northStops, nowMin), [depNorth, nowMin]);
+  const southAll = useMemo(() => activeTrains(depSouth, southStops, nowMin), [depSouth, nowMin]);
+  const northAll = useMemo(() => activeTrains(depNorth, northStops, nowMin), [depNorth, nowMin]);
+  const { south: southT, north: northT } = useMemo(
+    () => capFleet(southAll, northAll, MAX_FLEET), [southAll, northAll]
+  );
 
   const onScrub = (v) => { setLive(false); setScrub(v); };
 
@@ -87,6 +93,11 @@ export default function App() {
             <div className="card panel">
               <h3>Next Departures</h3>
               <NextDepartures depSouth={depSouth} depNorth={depNorth} nowMin={nowMin} />
+            </div>
+
+            <div className="card panel">
+              <h3>Fleet (24 train sets)</h3>
+              <FleetInfo />
             </div>
 
             <div className="card panel">
