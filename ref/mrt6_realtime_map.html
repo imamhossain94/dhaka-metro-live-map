@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dhaka MRT Line 6 — Live Map</title>
+<style>
+  :root{
+    --teal-deep:#00594C;
+    --teal-mid:#0A6E5C;
+    --paper:#F7F5F0;
+    --paper-card:#FFFFFF;
+    --ink:#171A19;
+    --ink-soft:#5B6664;
+    --gold:#C8961E;
+    --gold-soft:#E8D9B0;
+    --hairline:#DEDAD0;
+    --south:#E76F2A;   /* Uttara North -> Motijheel */
+    --north:#2563EB;   /* Motijheel -> Uttara North */
+    --ok:#1E9E73;
+    --closed:#C2473D;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:'IBM Plex Sans','Segoe UI',Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1240px;margin:0 auto;padding:0 18px 64px;}
+
+  /* HEADER */
+  header{background:var(--teal-deep);color:#fff;padding:30px 18px 26px;position:relative;overflow:hidden;}
+  header::after{content:"";position:absolute;right:-70px;top:-70px;width:260px;height:260px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,0.06),transparent 70%);}
+  .header-inner{max-width:1240px;margin:0 auto;position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;}
+  .line-badge{display:inline-flex;align-items:center;gap:9px;background:var(--gold);color:var(--teal-deep);
+    font-weight:800;font-size:12.5px;letter-spacing:0.06em;padding:6px 13px;border-radius:100px;text-transform:uppercase;}
+  .line-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--teal-deep);animation:blink 1.6s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+  h1{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.01em;margin:13px 0 3px;line-height:1.05;}
+  .subtitle{color:rgba(255,255,255,0.78);font-size:14.5px;margin:0;}
+  .top-link{color:#fff;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.35);
+    padding:9px 14px;border-radius:8px;white-space:nowrap;transition:background .15s;}
+  .top-link:hover{background:rgba(255,255,255,.14);}
+
+  /* STATUS BAR */
+  .statusbar{
+    position:sticky;top:0;z-index:40;background:rgba(247,245,240,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--hairline);margin-bottom:22px;
+  }
+  .statusbar-inner{max-width:1240px;margin:0 auto;padding:12px 18px;display:flex;gap:14px 26px;align-items:center;flex-wrap:wrap;}
+  .clock{display:flex;align-items:baseline;gap:8px;}
+  .clock .t{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:30px;font-weight:700;letter-spacing:0.01em;line-height:1;}
+  .clock .mer{font-size:14px;font-weight:700;color:var(--ink-soft);}
+  .clock .zone{font-size:11px;color:var(--ink-soft);display:block;margin-top:3px;letter-spacing:.03em;}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:7px 12px;border-radius:100px;
+    background:var(--paper-card);border:1px solid var(--hairline);}
+  .pill .k{color:var(--ink-soft);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;}
+  .pill .sv-dot{width:9px;height:9px;border-radius:50%;background:var(--ok);}
+  .pill.closed .sv-dot{background:var(--closed);}
+  .count-grp{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap;}
+  .count{display:flex;align-items:center;gap:8px;background:var(--paper-card);border:1px solid var(--hairline);
+    border-radius:100px;padding:6px 12px;font-size:13px;font-weight:700;}
+  .count .sq{width:12px;height:12px;border-radius:3px;}
+  .count.south .sq{background:var(--south);}
+  .count.north .sq{background:var(--north);}
+  .count .n{font-family:'IBM Plex Mono',monospace;}
+
+  /* LAYOUT */
+  .grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(290px,1fr);gap:22px;align-items:start;}
+  @media (max-width:860px){.grid{grid-template-columns:1fr;}}
+
+  .card{background:var(--paper-card);border:1px solid var(--hairline);border-radius:var(--radius);}
+  .map-card{padding:14px 10px;}
+  #mapSvg{display:block;width:100%;height:auto;}
+
+  .side{display:flex;flex-direction:column;gap:18px;position:sticky;top:78px;}
+  @media (max-width:860px){.side{position:static;}}
+  .panel{padding:16px 16px 18px;}
+  .panel h3{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);}
+
+  /* CONTROLS */
+  .ctrl-row{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+  .ctrl-row label{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);}
+  select,input[type=range]{width:100%;font-family:inherit;}
+  select{padding:9px 10px;border-radius:8px;border:1px solid var(--hairline);background:var(--paper);font-size:14px;color:var(--ink);}
+  .scrub-head{display:flex;justify-content:space-between;align-items:center;}
+  .scrub-val{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;}
+  input[type=range]{accent-color:var(--teal-deep);margin:6px 0 2px;}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .btn{border:1px solid var(--hairline);background:var(--paper);color:var(--ink);border-radius:7px;
+    padding:7px 11px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s;}
+  .btn:hover{border-color:var(--teal-deep);}
+  .btn.live{background:var(--teal-deep);color:#fff;border-color:var(--teal-deep);}
+  .btn.live.off{background:var(--paper);color:var(--teal-deep);}
+
+  /* TRAIN LIST */
+  .train-list{display:flex;flex-direction:column;gap:8px;}
+  .train-item{display:flex;align-items:center;gap:11px;padding:9px 11px;border:1px solid var(--hairline);border-radius:9px;background:var(--paper);}
+  .train-item .ico{width:26px;height:16px;border-radius:5px;flex:none;position:relative;}
+  .train-item.south .ico{background:var(--south);}
+  .train-item.north .ico{background:var(--north);}
+  .train-item .ico::after{content:"";position:absolute;top:4px;right:4px;width:8px;height:8px;border-top:2px solid #fff;border-right:2px solid #fff;transform:rotate(45deg);opacity:.85;}
+  .train-item.north .ico::after{right:auto;left:4px;transform:rotate(-135deg);}
+  .train-item .tx{min-width:0;}
+  .train-item .hd{font-size:13px;font-weight:700;}
+  .train-item .sb{font-size:12px;color:var(--ink-soft);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .empty{font-size:13px;color:var(--ink-soft);padding:10px 2px;}
+
+  /* NEXT DEPARTURES */
+  .dep-grp{margin-bottom:12px;}
+  .dep-grp .lab{font-size:12px;font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:7px;}
+  .dep-grp .lab .sq{width:11px;height:11px;border-radius:3px;}
+  .dep-grp.south .sq{background:var(--south);}.dep-grp.north .sq{background:var(--north);}
+  .dep-times{display:flex;gap:6px;flex-wrap:wrap;}
+  .dep-times span{font-family:'IBM Plex Mono',monospace;font-size:12.5px;background:var(--paper);border:1px solid var(--hairline);
+    border-radius:6px;padding:3px 8px;}
+  .dep-times span.soon{border-color:var(--gold);background:#FFF6E0;font-weight:700;}
+
+  /* LEGEND */
+  .legend{display:flex;flex-direction:column;gap:9px;font-size:13px;}
+  .legend .row{display:flex;align-items:center;gap:10px;}
+  .lg-line{width:24px;height:5px;border-radius:3px;background:var(--teal-deep);}
+  .lg-term{width:14px;height:14px;border-radius:50%;background:var(--gold);}
+  .lg-stn{width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid var(--teal-deep);}
+  .lg-up{width:13px;height:13px;border-radius:50%;background:#fff;border:2px dashed var(--ink-soft);}
+  .lg-s{width:22px;height:13px;border-radius:4px;background:var(--south);}
+  .lg-n{width:22px;height:13px;border-radius:4px;background:var(--north);}
+
+  footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--hairline);font-size:12px;color:var(--ink-soft);}
+  footer p{margin:5px 0;}
+
+  /* SVG station pulse */
+  .stn-pulse{animation:pulse 1.4s ease-out infinite;transform-origin:center;transform-box:fill-box;}
+  @keyframes pulse{0%{opacity:.55;r:10}70%{opacity:0;r:22}100%{opacity:0;r:22}}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <span class="line-badge"><span class="dot"></span>MRT Line 6 · Live</span>
+      <h1>Dhaka Metro — Live Map</h1>
+      <p class="subtitle">Real-time train positions on Bangladesh Standard Time · Uttara North ⇄ Motijheel</p>
+    </div>
+    <a class="top-link" href="mrt6_fare_chart.html">Fare &amp; Route Chart →</a>
+  </div>
+</header>
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <div class="statusbar-inner">
+    <div class="clock">
+      <div>
+        <span class="t" id="clockT">--:--:--</span>
+        <span class="mer" id="clockMer"></span>
+        <span class="zone" id="clockZone">Asia/Dhaka · BST (UTC+6)</span>
+      </div>
+    </div>
+    <div class="pill"><span class="k">Schedule</span><span id="dayTypeLbl">—</span></div>
+    <div class="pill" id="servicePill"><span class="sv-dot"></span><span id="serviceLbl">—</span></div>
+    <div class="count-grp">
+      <div class="count south"><span class="sq"></span><span class="n" id="cSouth">0</span>→ Motijheel</div>
+      <div class="count north"><span class="sq"></span><span class="n" id="cNorth">0</span>→ Uttara</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="grid">
+
+    <!-- MAP -->
+    <div class="card map-card">
+      <div id="mapHolder"></div>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side">
+
+      <div class="card panel">
+        <h3>View Controls</h3>
+        <div class="ctrl-row">
+          <label for="daySel">Schedule day</label>
+          <select id="daySel">
+            <option value="auto">Auto-detect (today)</option>
+            <option value="weekday">Sunday–Thursday</option>
+            <option value="friday">Friday</option>
+            <option value="saturday">Saturday</option>
+            <option value="govtHoliday">Govt. Holiday</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <div class="scrub-head">
+            <label for="scrub">Time of day</label>
+            <span class="scrub-val" id="scrubVal">--:--</span>
+          </div>
+          <input type="range" id="scrub" min="0" max="1439" value="480" step="1">
+          <div class="btn-row">
+            <button class="btn live" id="liveBtn">● LIVE</button>
+            <button class="btn" data-t="510">8:30</button>
+            <button class="btn" data-t="780">1:00 PM</button>
+            <button class="btn" data-t="1080">6:00 PM</button>
+            <button class="btn" data-t="1305">9:45 PM</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <h3>Trains Running Now (<span id="runCount">0</span>)</h3>
+        <div class="train-list" id="trainList"></div>
+      </div>
+
+      <div class="card panel">
+        <h3>Next Departures</h3>
+        <div class="dep-grp south">
+          <div class="lab"><span class="sq"></span>From Uttara North → Motijheel</div>
+          <div class="dep-times" id="depSouth"></div>
+        </div>
+        <div class="dep-grp north">
+          <div class="lab"><span class="sq"></span>From Motijheel → Uttara North</div>
+          <div class="dep-times" id="depNorth"></div>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <h3>Legend</h3>
+        <div class="legend">
+          <div class="row"><span class="lg-line"></span> MRT-6 line</div>
+          <div class="row"><span class="lg-term"></span> Terminal (Uttara North / Motijheel)</div>
+          <div class="row"><span class="lg-stn"></span> Station</div>
+          <div class="row"><span class="lg-up"></span> Kamlapur (under construction)</div>
+          <div class="row"><span class="lg-s"></span> Train → Motijheel (southbound)</div>
+          <div class="row"><span class="lg-n"></span> Train → Uttara North (northbound)</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <p><b>How positions are estimated:</b> trains are simulated from the official MRT-6 timetable (first/last train + headway bands) and the published station-to-station running times. Each train glides between stations in proportion to its scheduled segment time and pauses 30&nbsp;seconds at every platform (~44&nbsp;min end-to-end). This is a schedule-based estimate, not live GPS.</p>
+    <p>Time source: your device clock converted to <b>Bangladesh Standard Time (UTC+6, no DST)</b>. Use the controls to preview any time of day or another day's schedule. Govt-holiday auto-detection uses fixed-date national holidays only — add Eid/lunar dates in the <code>HOLIDAYS</code> set inside the file.</p>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   DATA — stations (north→south), segment running times, geometry
+   ============================================================ */
+const ORDER = ["Uttara North","Uttara Center","Uttara South","Pallabi","Mirpur 11",
+  "Mirpur 10","Kazipara","Shewrapara","Agargaon","Bijoy Sarani","Farmgate",
+  "Karwan Bazar","Shahbagh","Dhaka University","Bangladesh Secretariat","Motijheel"];
+
+const BANGLA = {
+  "Uttara North":"উত্তরা উত্তর","Uttara Center":"উত্তরা সেন্টার","Uttara South":"উত্তরা দক্ষিণ",
+  "Pallabi":"পল্লবী","Mirpur 11":"মিরপুর ১১","Mirpur 10":"মিরপুর ১০","Kazipara":"কাজীপাড়া",
+  "Shewrapara":"শেওড়াপাড়া","Agargaon":"আগারগাঁও","Bijoy Sarani":"বিজয় সরণি","Farmgate":"ফার্মগেট",
+  "Karwan Bazar":"কারওয়ান বাজার","Shahbagh":"শাহবাগ","Dhaka University":"ঢাকা বিশ্ববিদ্যালয়",
+  "Bangladesh Secretariat":"বাংলাদেশ সচিবালয়","Motijheel":"মতিঝিল","Kamlapur":"কমলাপুর"
+};
+
+// minutes between consecutive stations (15 segments)
+const SEG = [3,2,3,2,2,3,2,3,2,3,2,2,2,3,3];
+
+// coordinates lifted from the official map's image-map (no image used)
+const COORDS = {
+  "Uttara North":[224,63],"Uttara Center":[224,185],"Uttara South":[224,325],"Pallabi":[224,449],
+  "Mirpur 11":[225,588],"Mirpur 10":[224,709],"Kazipara":[225,857],"Shewrapara":[313,943],
+  "Agargaon":[313,1027],"Bijoy Sarani":[312,1121],"Farmgate":[401,1212],"Karwan Bazar":[400,1344],
+  "Shahbagh":[402,1482],"Dhaka University":[490,1567],"Bangladesh Secretariat":[600,1567],
+  "Motijheel":[690,1654],"Kamlapur":[754,1595]
+};
+
+const P = ORDER.map(n=>COORDS[n]);
+
+// Each train pauses DWELL minutes at every intermediate platform.
+const DWELL = 0.5; // 30 seconds
+
+// Build elapsed-from-departure -> point events for one direction.
+// Intermediate platforms get two events (arrival + departure) at the same
+// point, so the train sits still for DWELL minutes.
+function buildStops(order, seg){
+  const stops=[]; let e=0;
+  const c0=COORDS[order[0]];
+  stops.push({e,x:c0[0],y:c0[1],station:order[0]});      // depart origin (no dwell)
+  for(let i=1;i<order.length;i++){
+    e += seg[i-1];                                        // arrive station i
+    const c=COORDS[order[i]];
+    stops.push({e,x:c[0],y:c[1],station:order[i]});
+    if(i < order.length-1){                               // dwell at intermediate platform
+      e += DWELL;
+      stops.push({e,x:c[0],y:c[1],station:order[i]});
+    }
+  }
+  return stops;
+}
+const southStops = buildStops(ORDER, SEG);
+const northStops = buildStops([...ORDER].reverse(), [...SEG].reverse());
+const TOTAL = southStops[southStops.length-1].e; // 37 running + 14×0.5 dwell = 44
+
+/* ============================================================
+   TIMETABLE — first/last departures + headway bands per day type
+   ============================================================ */
+const b=(start,end,headway)=>({s:t2m(start),e:t2m(end),h:headway});
+function t2m(s){const[h,m]=s.split(":").map(Number);return h*60+m;}
+
+const SCHEDULES = {
+  weekday:{ label:"Sun–Thu (Regular)",
+    south:{first:t2m("06:30"),last:t2m("21:50"),bands:[
+      b("06:30","07:10",20),b("07:11","07:30",10),b("07:31","08:10",8),b("08:11","09:50",6),
+      b("09:51","16:22",8),b("16:23","19:18",6),b("19:19","19:58",8),b("19:59","21:00",10),
+      b("21:01","21:30",15),b("21:31","21:50",20)]},
+    north:{first:t2m("07:15"),last:t2m("22:30"),bands:[
+      b("07:15","07:30",15),b("07:31","08:10",10),b("08:11","08:48",8),b("08:49","10:29",6),
+      b("10:30","17:01",8),b("17:02","19:57",6),b("19:58","20:20",8),b("20:21","21:40",10),
+      b("21:41","22:10",15),b("22:11","22:30",20)]} },
+  saturday:{ label:"Saturday",
+    south:{first:t2m("06:30"),last:t2m("21:50"),bands:[
+      b("06:30","07:10",20),b("07:11","07:25",15),b("07:26","07:49",12),b("07:50","09:49",10),
+      b("09:50","19:25",8),b("19:26","21:00",10),b("21:01","21:30",15),b("21:31","21:50",20)]},
+    north:{first:t2m("07:15"),last:t2m("22:30"),bands:[
+      b("07:15","07:30",15),b("07:31","08:00",12),b("08:01","08:24",10),b("08:25","20:00",8),
+      b("20:01","21:40",10),b("21:41","22:10",15),b("22:11","22:30",20)]} },
+  friday:{ label:"Friday",
+    south:{first:t2m("15:00"),last:t2m("21:50"),bands:[
+      b("15:00","19:56",8),b("19:57","21:00",10),b("21:01","21:30",15),b("21:31","21:50",20)]},
+    north:{first:t2m("15:20"),last:t2m("22:30"),bands:[
+      b("15:20","20:31",8),b("20:32","21:40",10),b("21:41","22:10",15),b("22:11","22:30",20)]} },
+  govtHoliday:{ label:"Govt. Holiday",
+    south:{first:t2m("06:30"),last:t2m("21:50"),bands:[
+      b("06:30","07:10",20),b("07:11","07:25",15),b("07:26","10:37",12),b("10:38","21:00",10),
+      b("21:01","21:30",15),b("21:31","21:50",20)]},
+    north:{first:t2m("07:15"),last:t2m("22:30"),bands:[
+      b("07:15","07:30",15),b("07:31","11:17",12),b("11:18","21:40",8),
+      b("21:41","22:10",15),b("22:11","22:30",20)]} }
+};
+
+// Fixed-date national holidays (edit/add lunar Eid dates as needed)
+const HOLIDAYS = new Set([
+  "2026-02-21", // Language Martyrs' Day
+  "2026-03-26", // Independence Day
+  "2026-04-14", // Pohela Boishakh
+  "2026-05-01", // May Day
+  "2026-12-16", // Victory Day
+  "2026-12-25"  // Christmas
+]);
+
+/* ============================================================
+   TIME (Bangladesh = UTC+6, fixed)
+   ============================================================ */
+function dhakaNow(){
+  const d = new Date(Date.now() + 6*3600*1000); // shift to BST, read as UTC
+  return {
+    dow:d.getUTCDay(), h:d.getUTCHours(), m:d.getUTCMinutes(), s:d.getUTCSeconds(),
+    minOfDay:d.getUTCHours()*60+d.getUTCMinutes()+d.getUTCSeconds()/60+d.getUTCMilliseconds()/60000,
+    iso:`${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`
+  };
+}
+const pad=n=>String(n).padStart(2,"0");
+function fmt12(min){
+  min=((min%1440)+1440)%1440;
+  let h=Math.floor(min/60), m=Math.floor(min%60);
+  const ap=h<12?"AM":"PM"; h=h%12||12;
+  return `${h}:${pad(m)} ${ap}`;
+}
+
+/* ============================================================
+   DEPARTURE GENERATION (iterative headway walk)
+   ============================================================ */
+const _depCache={};
+function getDeps(dayType,dir){
+  const key=dayType+"|"+dir;
+  if(_depCache[key]) return _depCache[key];
+  const cfg=SCHEDULES[dayType][dir];
+  const out=[]; let t=cfg.first, guard=0;
+  while(t<=cfg.last+1e-6 && guard<2000){
+    out.push(t);
+    const band=cfg.bands.find(bb=>t<=bb.e+1e-6) || cfg.bands[cfg.bands.length-1];
+    t+=band.h; guard++;
+  }
+  _depCache[key]=out; return out;
+}
+
+/* ============================================================
+   POSITION INTERPOLATION
+   ============================================================ */
+// heading from the nearest moving segment, so a dwelling train stays aligned
+function headingAt(stops,j){
+  for(let k=j;k<stops.length-1;k++){
+    const dx=stops[k+1].x-stops[k].x, dy=stops[k+1].y-stops[k].y;
+    if(dx*dx+dy*dy>1e-6) return Math.atan2(dy,dx)*180/Math.PI;
+  }
+  for(let k=j;k>0;k--){
+    const dx=stops[k].x-stops[k-1].x, dy=stops[k].y-stops[k-1].y;
+    if(dx*dx+dy*dy>1e-6) return Math.atan2(dy,dx)*180/Math.PI;
+  }
+  return 0;
+}
+function interp(stops,e){
+  let j=stops.length-2;
+  if(e<=stops[0].e) j=0;
+  else for(let k=0;k<stops.length-1;k++){ if(e<=stops[k+1].e+1e-9){ j=k; break; } }
+  const a=stops[j], b=stops[j+1];
+  const f=(b.e-a.e)>1e-9 ? (e-a.e)/(b.e-a.e) : 0;
+  return {
+    x:a.x+(b.x-a.x)*f, y:a.y+(b.y-a.y)*f, angle:headingAt(stops,j),
+    prev:a.station, next:b.station, frac:f, dwell:(a.station===b.station)
+  };
+}
+function activeTrains(deps,stops,nowMin){
+  const out=[];
+  for(const d of deps){
+    const e=nowMin-d;
+    if(e>=0 && e<=TOTAL) out.push(Object.assign({dep:d,e},interp(stops,e)));
+  }
+  return out;
+}
+
+/* ============================================================
+   STATIC MAP RENDER
+   ============================================================ */
+const VB="160 18 760 1716";
+const LBL={};
+ORDER.forEach((n,i)=>{ LBL[n]={dx:18,dy:5,anchor:"start",two:true}; });
+LBL["Dhaka University"]={dx:0,dy:34,anchor:"middle",two:false};
+LBL["Bangladesh Secretariat"]={dx:0,dy:-16,anchor:"middle",two:false};
+LBL["Motijheel"]={dx:18,dy:5,anchor:"start",two:true};
+LBL["Kamlapur"]={dx:18,dy:5,anchor:"start",two:false};
+
+function buildMap(){
+  let path="M"+P.map(p=>p.join(" ")).join(" L ");
+  let s=`<svg id="mapSvg" viewBox="${VB}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Live MRT Line 6 map">`;
+  s+=`<defs><filter id="trainShadow" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="1.4" stdDeviation="1.6" flood-color="#000" flood-opacity="0.35"/></filter></defs>`;
+
+  // Kamlapur (upcoming) dashed extension
+  const mj=COORDS["Motijheel"], kp=COORDS["Kamlapur"];
+  s+=`<line x1="${mj[0]}" y1="${mj[1]}" x2="${kp[0]}" y2="${kp[1]}" stroke="#B9B3A4" stroke-width="5" stroke-dasharray="7 7" stroke-linecap="round"/>`;
+
+  // line casing + core
+  s+=`<path d="${path}" fill="none" stroke="#FFFFFF" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"/>`;
+  s+=`<path d="${path}" fill="none" stroke="#00594C" stroke-width="5.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+
+  // pulse layer (under trains, above line)
+  s+=`<g id="pulseLayer"></g>`;
+
+  // Kamlapur node
+  s+=`<g><title>Kamlapur · ${BANGLA["Kamlapur"]} (under construction)</title>
+      <circle cx="${kp[0]}" cy="${kp[1]}" r="7" fill="#FFFFFF" stroke="#8C8678" stroke-width="2" stroke-dasharray="3 2.5"/></g>`;
+  s+=label("Kamlapur",kp[0],kp[1],true);
+
+  // stations
+  ORDER.forEach((n,i)=>{
+    const [x,y]=P[i]; const term=(i===0||i===15);
+    s+=`<g><title>${n} · ${BANGLA[n]}</title>`;
+    s+=`<circle id="pls-${i}" cx="${x}" cy="${y}" r="10" fill="${term?'#C8961E':'#00594C'}" opacity="0" class="" />`;
+    if(term){
+      s+=`<circle cx="${x}" cy="${y}" r="10" fill="#C8961E" stroke="#fff" stroke-width="2.5"/>`;
+      s+=`<circle cx="${x}" cy="${y}" r="3.4" fill="#00594C"/>`;
+    } else {
+      s+=`<circle cx="${x}" cy="${y}" r="6.6" fill="#FFFFFF" stroke="#00594C" stroke-width="3"/>`;
+    }
+    s+=`</g>`;
+    s+=label(n,x,y,term);
+  });
+
+  s+=`<g id="trainLayer"></g>`;
+  s+=`</svg>`;
+  return s;
+}
+function label(n,x,y){
+  const c=LBL[n]; const tx=x+c.dx, ty=y+c.dy;
+  let t=`<text x="${tx}" y="${ty}" text-anchor="${c.anchor}" font-family="'IBM Plex Sans',sans-serif" fill="#171A19">`;
+  t+=`<tspan font-size="15" font-weight="700">${n}</tspan>`;
+  if(c.two) t+=`<tspan x="${tx}" dy="15" font-size="11.5" font-weight="500" fill="#9A7A26">${BANGLA[n]}</tspan>`;
+  t+=`</text>`;
+  return t;
+}
+
+/* ============================================================
+   TRAIN + PULSE RENDER
+   ============================================================ */
+const OFF=9;
+function trainSvg(t,cls){
+  const rad=t.angle*Math.PI/180;
+  const ox=-Math.sin(rad)*OFF, oy=Math.cos(rad)*OFF;
+  const x=(t.x+ox).toFixed(1), y=(t.y+oy).toFixed(1);
+  const col = cls==="south" ? "#E76F2A" : "#2563EB";
+  return `<g transform="translate(${x},${y}) rotate(${t.angle.toFixed(1)})">
+    <rect x="-13" y="-6.5" width="26" height="13" rx="5" fill="${col}" stroke="#15110c" stroke-width="1.1" filter="url(#trainShadow)"/>
+    <polygon points="13,0 8.5,-4.6 8.5,4.6" fill="#ffffff" opacity="0.9"/>
+    <rect x="-8.5" y="-3.4" width="3" height="6.8" rx="1" fill="#ffffff" opacity="0.8"/>
+    <rect x="-3" y="-3.4" width="3" height="6.8" rx="1" fill="#ffffff" opacity="0.8"/>
+  </g>`;
+}
+function renderTrains(southT,northT){
+  const layer=document.getElementById("trainLayer");
+  layer.innerHTML = southT.map(t=>trainSvg(t,"south")).join("") + northT.map(t=>trainSvg(t,"north")).join("");
+
+  // pulse a station when a train is sitting at it
+  for(let i=0;i<ORDER.length;i++){
+    const el=document.getElementById("pls-"+i);
+    const here=[...southT,...northT].some(t=>{
+      const target=ORDER[i];
+      if(t.dwell && t.prev===target) return true;        // train sitting at this platform
+      return (t.frac<0.1 && t.prev===target) || (t.frac>0.9 && t.next===target);
+    });
+    if(here){ el.setAttribute("opacity","0.5"); el.classList.add("stn-pulse"); }
+    else { el.setAttribute("opacity","0"); el.classList.remove("stn-pulse"); }
+  }
+}
+
+/* ============================================================
+   PANEL RENDER
+   ============================================================ */
+function statusText(t,dirSouth){
+  const dest = dirSouth ? "Motijheel" : "Uttara North";
+  let sb;
+  if(t.e<0.2) sb = "Departing "+t.prev;
+  else if(t.e>TOTAL-0.2) sb = "Arriving "+dest;
+  else if(t.dwell) sb = "Stopped at "+t.prev;
+  else if(t.frac>0.9) sb = "Approaching "+t.next;
+  else sb = t.prev+" → "+t.next;
+  return {hd:"→ "+dest, sb:sb+"  ·  dep "+fmt12(t.dep)};
+}
+function renderList(southT,northT){
+  const list=document.getElementById("trainList");
+  const all=[...southT.map(t=>({t,s:true})),...northT.map(t=>({t,s:false}))]
+            .sort((a,b)=>a.t.dep-b.t.dep);
+  document.getElementById("runCount").textContent=all.length;
+  if(!all.length){ list.innerHTML=`<div class="empty">No trains on the line right now.</div>`; return; }
+  list.innerHTML=all.map(o=>{
+    const i=statusText(o.t,o.s);
+    return `<div class="train-item ${o.s?'south':'north'}"><div class="ico"></div>
+      <div class="tx"><div class="hd">${i.hd}</div><div class="sb">${i.sb}</div></div></div>`;
+  }).join("");
+}
+function renderDeps(dayType,nowMin){
+  ["south","north"].forEach(dir=>{
+    const deps=getDeps(dayType,dir).filter(d=>d>=nowMin-0.001).slice(0,4);
+    const el=document.getElementById(dir==="south"?"depSouth":"depNorth");
+    if(!deps.length){ el.innerHTML=`<span style="border:none;background:none;color:var(--ink-soft)">— none left today —</span>`; return; }
+    el.innerHTML=deps.map((d,idx)=>{
+      const mins=Math.round(d-nowMin);
+      const soon = idx===0 && mins<=2;
+      return `<span class="${soon?'soon':''}">${fmt12(d)}<span style="opacity:.55"> · ${mins<=0?'now':mins+'m'}</span></span>`;
+    }).join("");
+  });
+}
+
+/* ============================================================
+   STATE + TICK
+   ============================================================ */
+let live=true, dayOverride="auto";
+const scrub=document.getElementById("scrub");
+const liveBtn=document.getElementById("liveBtn");
+const daySel=document.getElementById("daySel");
+
+function resolveDayType(now){
+  if(dayOverride!=="auto") return dayOverride;
+  if(HOLIDAYS.has(now.iso)) return "govtHoliday";
+  if(now.dow===5) return "friday";
+  if(now.dow===6) return "saturday";
+  return "weekday";
+}
+
+function tick(){
+  const now=dhakaNow();
+  let nowMin;
+  if(live){ nowMin=now.minOfDay; scrub.value=Math.round(nowMin); }
+  else { nowMin=Number(scrub.value); }
+
+  const dayType=resolveDayType(now);
+
+  // clock display = the time being viewed
+  if(live){
+    document.getElementById("clockT").textContent=`${pad(now.h)}:${pad(now.m)}:${pad(now.s)}`;
+    document.getElementById("clockMer").textContent=now.h<12?"AM":"PM";
+    document.getElementById("clockZone").textContent="Asia/Dhaka · BST (UTC+6) · LIVE";
+  } else {
+    const hh=Math.floor(nowMin/60), mm=Math.floor(nowMin%60);
+    document.getElementById("clockT").textContent=`${pad(hh)}:${pad(mm)}`;
+    document.getElementById("clockMer").textContent=hh<12?"AM":"PM";
+    document.getElementById("clockZone").textContent="PREVIEW (simulated time)";
+  }
+  document.getElementById("scrubVal").textContent=fmt12(nowMin);
+  document.getElementById("dayTypeLbl").textContent=SCHEDULES[dayType].label
+     + (dayOverride==="auto" && dayType==="govtHoliday" ? " (detected)" : "");
+
+  // service status
+  const sc=SCHEDULES[dayType];
+  const startMin=Math.min(sc.south.first,sc.north.first);
+  const endMin=Math.max(sc.south.last,sc.north.last)+TOTAL;
+  const pill=document.getElementById("servicePill");
+  const lbl=document.getElementById("serviceLbl");
+  if(nowMin<startMin){ pill.classList.add("closed"); lbl.textContent="Opens "+fmt12(startMin); }
+  else if(nowMin>endMin){ pill.classList.add("closed"); lbl.textContent="Closed for the day"; }
+  else { pill.classList.remove("closed"); lbl.textContent="In service"; }
+
+  // trains
+  const southT=activeTrains(getDeps(dayType,"south"),southStops,nowMin);
+  const northT=activeTrains(getDeps(dayType,"north"),northStops,nowMin);
+  document.getElementById("cSouth").textContent=southT.length;
+  document.getElementById("cNorth").textContent=northT.length;
+
+  renderTrains(southT,northT);
+  renderList(southT,northT);
+  renderDeps(dayType,nowMin);
+}
+
+/* ============================================================
+   INIT + EVENTS
+   ============================================================ */
+document.getElementById("mapHolder").innerHTML=buildMap();
+
+scrub.addEventListener("input",()=>{ setLive(false); tick(); });
+liveBtn.addEventListener("click",()=>{ setLive(!live); tick(); });
+daySel.addEventListener("change",()=>{ dayOverride=daySel.value; tick(); });
+document.querySelectorAll(".btn[data-t]").forEach(btn=>{
+  btn.addEventListener("click",()=>{ setLive(false); scrub.value=btn.getAttribute("data-t"); tick(); });
+});
+function setLive(v){
+  live=v;
+  liveBtn.classList.toggle("off",!v);
+  liveBtn.textContent = v ? "● LIVE" : "○ Go Live";
+}
+
+setLive(true);
+tick();
+setInterval(tick,250);
+</script>
+</body>
+</html>
