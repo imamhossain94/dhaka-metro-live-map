@@ -1,7 +1,34 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ORDER, COORDS, BANGLA } from '../data.js';
+import useMediaQuery from '../hooks/useMediaQuery.js';
 
-const VB = '160 18 760 1716';
+const VB_X = 160, VB_Y = 18, VB_W = 760, VB_H = 1716;
+const VB = `${VB_X} ${VB_Y} ${VB_W} ${VB_H}`;
+// mobile: crop to a genuinely zoomed-in 4:3 window — narrower than the full
+// route width, so on-screen scale is actually larger than the desktop view,
+// not just a shorter slice of it. The rider drags vertically to reveal more
+// stations; the window auto-follows the line horizontally (it zigzags) so a
+// separate horizontal drag isn't needed.
+const ZOOM_W = 420;
+const ZOOM_H = ZOOM_W * (3 / 4);
+const PAN_MIN = VB_Y;
+const PAN_MAX = VB_Y + VB_H - ZOOM_H;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+const ROUTE_PTS = ORDER.map((n) => COORDS[n]);
+// linear-interpolate the route's x at a given y, to re-center the zoomed
+// window horizontally whenever the vertical pan position changes.
+function routeXAtY(y) {
+  if (y <= ROUTE_PTS[0][1]) return ROUTE_PTS[0][0];
+  for (let i = 0; i < ROUTE_PTS.length - 1; i++) {
+    const [x0, y0] = ROUTE_PTS[i], [x1, y1] = ROUTE_PTS[i + 1];
+    if ((y >= y0 && y <= y1) || (y >= y1 && y <= y0)) {
+      const t = y1 === y0 ? 0 : (y - y0) / (y1 - y0);
+      return x0 + (x1 - x0) * t;
+    }
+  }
+  return ROUTE_PTS[ROUTE_PTS.length - 1][0];
+}
 // perpendicular offset so the two directions ride opposite sides of the line:
 // southbound (Uttara North -> Motijheel) rides Platform 2 / right side,
 // northbound (Motijheel -> Uttara North) rides Platform 1 / left side.
@@ -53,6 +80,48 @@ export default function MetroMap({ southT, northT, myMarker }) {
   const path = 'M' + P.map((p) => p.join(' ')).join(' L ');
   const mj = COORDS['Motijheel'], kp = COORDS['Kamlapur'];
 
+  const isMobile = useMediaQuery('(max-width: 860px)');
+  const [panY, setPanY] = useState(VB_Y);
+  const dragRef = useRef(null);
+  const autoCenteredRef = useRef(false);
+
+  // first time a live location appears, center the cropped view on it
+  useEffect(() => {
+    if (!isMobile || !myMarker) { autoCenteredRef.current = false; return; }
+    if (!autoCenteredRef.current) {
+      setPanY(clamp(myMarker.y - ZOOM_H / 2, PAN_MIN, PAN_MAX));
+      autoCenteredRef.current = true;
+    }
+  }, [isMobile, myMarker]);
+
+  const onPointerDown = (e) => {
+    if (!isMobile) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current = {
+      startClientY: e.clientY,
+      startPan: panY,
+      heightPx: e.currentTarget.getBoundingClientRect().height,
+    };
+  };
+  const onPointerMove = (e) => {
+    if (!dragRef.current) return;
+    const { startClientY, startPan, heightPx } = dragRef.current;
+    const scale = ZOOM_H / heightPx;
+    const next = startPan - (e.clientY - startClientY) * scale;
+    setPanY(clamp(next, PAN_MIN, PAN_MAX));
+  };
+  const endDrag = () => { dragRef.current = null; };
+
+  const panX = useMemo(() => {
+    if (!isMobile) return VB_X;
+    const cx = routeXAtY(panY + ZOOM_H / 2);
+    return clamp(cx - ZOOM_W / 2, VB_X, VB_X + VB_W - ZOOM_W);
+  }, [isMobile, panY]);
+
+  const viewBox = isMobile ? `${panX} ${panY} ${ZOOM_W} ${ZOOM_H}` : VB;
+  const scrollPct = PAN_MAX > PAN_MIN ? (panY - PAN_MIN) / (PAN_MAX - PAN_MIN) : 0;
+  const thumbPct = ZOOM_H / VB_H;
+
   const activeStations = useMemo(() => {
     const set = new Set();
     [...southT, ...northT].forEach((t) => {
@@ -64,7 +133,13 @@ export default function MetroMap({ southT, northT, myMarker }) {
   }, [southT, northT]);
 
   return (
-    <svg viewBox={VB} role="img" aria-label="Live MRT Line 6 map" style={{ display: 'block', width: '100%', height: 'auto' }}>
+    <div className={'map-viewport' + (isMobile ? ' cropped' : '')}>
+    <svg
+      viewBox={viewBox} role="img" aria-label="Live MRT Line 6 map"
+      style={{ display: 'block', width: '100%', height: isMobile ? '100%' : 'auto', touchAction: isMobile ? 'none' : 'auto' }}
+      onPointerDown={onPointerDown} onPointerMove={onPointerMove}
+      onPointerUp={endDrag} onPointerCancel={endDrag} onPointerLeave={endDrag}
+    >
       <defs>
         <filter id="trainShadow" x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow dx="0" dy="1.4" stdDeviation="1.6" floodColor="#000" floodOpacity="0.35" />
@@ -139,5 +214,15 @@ export default function MetroMap({ southT, northT, myMarker }) {
         </g>
       )}
     </svg>
+
+    {isMobile && (
+      <>
+        <div className="map-scrollbar">
+          <div className="thumb" style={{ height: `${thumbPct * 100}%`, top: `${scrollPct * (1 - thumbPct) * 100}%` }} />
+        </div>
+        <div className="map-hint">↕ Drag the map to see other stations</div>
+      </>
+    )}
+    </div>
   );
 }

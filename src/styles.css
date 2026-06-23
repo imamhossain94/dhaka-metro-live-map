@@ -66,6 +66,14 @@ h1{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.01em;margin:
 .card{background:var(--paper-card);border:1px solid var(--hairline);border-radius:var(--radius);}
 .map-card{padding:14px 10px;}
 
+.map-viewport{position:relative;}
+.map-viewport.cropped{aspect-ratio:4/3;overflow:hidden;border-radius:8px;cursor:grab;}
+.map-viewport.cropped svg{cursor:grab;}
+.map-scrollbar{position:absolute;top:6px;right:6px;bottom:6px;width:4px;background:rgba(0,0,0,.08);border-radius:3px;pointer-events:none;}
+.map-scrollbar .thumb{position:absolute;left:0;width:100%;background:var(--teal-deep);border-radius:3px;opacity:.55;}
+.map-hint{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);background:rgba(23,26,25,.72);color:#fff;
+  font-size:11px;font-weight:600;padding:4px 10px;border-radius:100px;pointer-events:none;white-space:nowrap;}
+
 .side{display:flex;flex-direction:column;gap:18px;position:sticky;top:78px;}
 @media (max-width:860px){.side{position:static;}}
 .panel{padding:16px 16px 18px;}
