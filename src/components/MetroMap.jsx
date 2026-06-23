@@ -39,7 +39,7 @@ function Train({ t, dir }) {
   );
 }
 
-export default function MetroMap({ southT, northT }) {
+export default function MetroMap({ southT, northT, myMarker }) {
   const P = ORDER.map((n) => COORDS[n]);
   const path = 'M' + P.map((p) => p.join(' ')).join(' L ');
   const mj = COORDS['Motijheel'], kp = COORDS['Kamlapur'];
@@ -104,6 +104,15 @@ export default function MetroMap({ southT, northT }) {
         {southT.map((t) => <Train key={'s' + t.dep} t={t} dir="south" />)}
         {northT.map((t) => <Train key={'n' + t.dep} t={t} dir="north" />)}
       </g>
+
+      {/* live rider location (approximate, schematic projection) */}
+      {myMarker && (
+        <g>
+          <circle cx={myMarker.x} cy={myMarker.y} r={myMarker.r} className="me-accuracy" />
+          <circle cx={myMarker.x} cy={myMarker.y} r={9} className="me-pulse" />
+          <circle cx={myMarker.x} cy={myMarker.y} r={6} fill="#7C3AED" stroke="#fff" strokeWidth={2.2} />
+        </g>
+      )}
     </svg>
   );
 }

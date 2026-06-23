@@ -7,6 +7,7 @@ export default function Legend() {
       <div className="row"><span className="lg-up" /> Kamlapur (under construction)</div>
       <div className="row"><span className="lg-s" /> Train → Motijheel (southbound)</div>
       <div className="row"><span className="lg-n" /> Train → Uttara North (northbound)</div>
+      <div className="row"><span className="lg-me" /> Your live location (approximate)</div>
     </div>
   );
 }

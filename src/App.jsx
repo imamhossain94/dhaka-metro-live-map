@@ -3,6 +3,8 @@ import {
   dhakaNow, resolveDayType, getDeps, activeTrains,
   southStops, northStops,
 } from './simulation.js';
+import { projectToRoute, metersToPx } from './geo.js';
+import useGeolocation from './hooks/useGeolocation.js';
 import StatusBar from './components/StatusBar.jsx';
 import MetroMap from './components/MetroMap.jsx';
 import Controls from './components/Controls.jsx';
@@ -15,6 +17,8 @@ export default function App() {
   const [dayOverride, setDayOverride] = useState('auto');
   const [scrub, setScrub] = useState(480);
   const [now, setNow] = useState(() => dhakaNow());
+  const [locate, setLocate] = useState(false);
+  const { position: myPos, error: geoError } = useGeolocation(locate);
 
   // tick the clock 4×/sec
   useEffect(() => {
@@ -34,6 +38,13 @@ export default function App() {
   const northT = useMemo(() => activeTrains(depNorth, northStops, nowMin), [depNorth, nowMin]);
 
   const onScrub = (v) => { setLive(false); setScrub(v); };
+
+  const myMarker = useMemo(() => {
+    if (!myPos) return null;
+    const proj = projectToRoute(myPos.lat, myPos.lon);
+    const r = Math.max(7, Math.min(60, metersToPx(myPos.accuracy || 0)));
+    return { ...proj, r };
+  }, [myPos]);
 
   return (
     <>
@@ -56,7 +67,7 @@ export default function App() {
       <div className="wrap">
         <div className="grid">
           <div className="card map-card">
-            <MetroMap southT={southT} northT={northT} />
+            <MetroMap southT={southT} northT={northT} myMarker={myMarker} />
           </div>
 
           <div className="side">
@@ -64,6 +75,7 @@ export default function App() {
               <Controls
                 dayOverride={dayOverride} setDayOverride={setDayOverride}
                 nowMin={nowMin} live={live} setLive={setLive} onScrub={onScrub}
+                locate={locate} setLocate={setLocate} geoError={geoError} myMarker={myMarker}
               />
             </div>
 

@@ -1,0 +1,257 @@
+Here are all 16 stations on the Dhaka MRT Line 6 route from north to south:
+
+Uttara North
+Uttara Center
+Uttara South
+Pallabi
+Mirpur 11
+Mirpur 10
+Kazipara
+Shewrapara
+Agargaon
+Bijoy Sarani
+Farmgate
+Karwan Bazar
+Shahbagh
+Dhaka University
+Bangladesh Secretariat
+Motijheel
+Kamlapur
+
+Route order: Uttara North → Uttara Center → Uttara South → Pallabi → Mirpur 11 → Mirpur 10 → Kazipara → Shewrapara → Agargaon → Bijoy Sarani → Farmgate → Karwan Bazar → Shahbagh → Dhaka University → Bangladesh Secretariat → Motijheel.
+
+
+
+Uttara North > Uttara Center > 3 min > 1.21 km
+Uttara Center > Uttara South > 2 min > 1.6 km
+Uttara South > Pallabi > 3 min > 2.2 km
+Pallabi > Mirput 11 > 2 min > 0.8 km
+Mirput 11 > Mirput 10 > 2 min > 1.2 km
+Mirput 10 > Kazipara > 3 min > 1.0 km
+Kazipara > Shewrapara> 2 min > 1.0 km
+Shewrapara > Agargaon > 3 min > 1.47 km
+Agargaon > Bijoy Sarani > 2 min > 1.4 km
+Bijoy Sarani > Farmgate > 3 min > 1.21 km
+Farmgate > Karwan Bazar > 2 min > 1.14 km
+Karwan Bazar > Shahbag > 2 min > 1.35 km
+Shahbag > Dhaka University > 2 min > 0.87 km
+Dhaka University > Bangladesh Secretariat > 3 min > 1.38 km
+Bangladesh Secretariat > Motijheel > 3 min > 1.22 km
+
+
+
+
+Uttara North
+Uttara Center
+Uttara South
+Pallabi
+Mirpur 11
+Mirpur 10
+Kazipara
+Shewrapara
+Agargaon
+Bijoy Sarani
+Farmgate
+Karwan Bazar
+Shahbagh
+Dhaka University
+Bangladesh Secretariat
+Motijheel
+
+
+
+
+regular fair single journey.
+Uttara North: (to)
+Uttara Center > 20
+Uttara South > 20
+Pallabi > 30
+Mirpur 11 > 30 
+Mirpur 10 > 40
+Kazipara > 40
+Shewrapara >50 
+Agargaon > 60
+Bijoy Sarani > 60
+Farmgate > 70
+Karwan Bazar > 80 
+Shahbagh > 80
+Dhaka University > 90
+Bangladesh Secretariat > 90
+Motijheel > 100
+Kamlapur > 100
+
+5tk par km
+minimum 20tk fair
+maximum 100tk fair
+
+maximum 20km distance from Uttara North to Kamlapur
+
+
+
+for freedom fighter and seniorcitizen (65+= age)
+they will get 25% discount
+price should be adjust like this:
+22.5 as 20
+37.5 as 35
+52.5 as 50
+67.5 as 65
+5 er gunitok hisabe vara hobe.
+
+
+MRT pass user will gate 10% discount.
+
+so add mode:
+1. Single Journey min 20 max 100
+2. MRT pass (10% discount)  min 18 max 90
+3. Freedom fighter  (25% discount) min 15 & max 75 
+
+
+
+
+Time table:
+
+Saturday >
+Uttara North to Motijheel:
+First train from Uttara North: 6:30AM 
+Last train from Uttara North:9:50PM
+
+First train from Motijheel: 7:15AM
+Last train from Motijheel: 10:30PM
+
+Train frequency or wait time: 
+06:30 AM - 07:10 AM -> Time: 20 Minutes
+07:11 AM - 07:25 AM -> Time: 15 Minutes
+07:26 AM - 07:49 AM -> Time: 12Minutes
+07:50 AM - 09:49 AM -> Time: 10 Minutes
+09:50 AM - 07:25 PM -> Time: 08 Minutes
+07:26 PM - 09:00 PM -> Time: 10Minutes
+09:01 PM - 09:30 PM -> Time: 15 Minutes
+09:31 PM - 09:50 PM -> Time: 20 Minutes
+
+Motijheel > Uttara North:
+07:15 AM - 07:30 AM -> Time: 15 Minutes
+07:31 AM - 08:00 AM -> Time: 12 Minutes
+08:01 AM - 08:24 AM -> Time: 10 Minutes
+08:25 AM - 08:00 PM -> Time: 08 Minutes
+08:01 PM - 09:40 PM -> Time: 10 Minutes
+09:41 PM - 10:10 PM -> Time: 15Minutes
+10:11 PM - 10:30 PM -> Time: 20 Minutes
+
+Note: Trains will depart from Motijheel Station Platform-01 until 3:00 PM; trains will depart from Motijheel Station Platform-02 from later times.
+
+
+
+Friday>
+Uttara North to Motijheel:
+First train from Uttara North: 3:00PM
+Last train from Uttara North:9:50PM
+
+First train from Motijheel: 3:20PM
+Last train from Motijheel: 10:30PM
+
+Train frequency or wait time:
+03:00 PM - 07:56 PM -> Time: 08 Minutes
+07:57 PM - 09:00 PM -> Time: 10Minutes
+09:01 PM - 09:30 PM -> Time: 15 Minutes
+09:31 PM - 09:50 PM -> Time: 20 Minutes
+
+Motijheel > Uttara North:
+03:20 PM - 08:31 PM -> Time: 08 Minutes
+08:32 PM - 09:40 PM -> Time: 10 Minutes
+09:41 PM - 10:10 PM -> Time: 15Minutes
+10:11 PM - 10:30 PM -> Time: 20 Minutes
+
+
+
+Govt. Holiday >
+Uttara North to Motijheel:
+First train from Uttara North: 6:30AM
+Last train from Uttara North:9:50PM
+
+First train from Motijheel: 7:15AM
+Last train from Motijheel: 10:30PM
+
+Train frequency or wait time:
+06:30 AM - 07:10 AM -> Time: 20 Minutes
+07:11 AM - 07:25 AM -> Time: 15 Minutes
+07:26 AM - 10:37 AM -> Time: 12Minutes
+10:38 AM - 09:00 PM -> Time: 10 Minutes
+09:01 PM - 09:30 PM -> Time: 15 Minutes
+09:31 PM - 09:50 PM -> Time: 20 Minutes
+
+Motijheel > Uttara North:
+07:15 AM - 07:30 AM -> Time: 15 Minutes
+07:31 AM - 11:17 AM -> Time: 12 Minutes
+11:18 PM - 09:40 PM -> Time: 08 Minutes
+09:41 PM - 10:10 PM -> Time: 15Minutes
+10:11 PM - 10:30 PM -> Time: 20 Minutes
+
+Note: Trains will depart from Motijheel Station Platform-01 until 3:00 PM; trains will depart from Motijheel Station Platform-02 from later times.
+
+
+
+Other working days (sun-thu)>
+Uttara North to Motijheel:
+First train from Uttara North: 6:30AM
+Last train from Uttara North:9:50PM
+
+First train from Motijheel: 7:15AM
+Last train from Motijheel: 10:30PM
+
+Train frequency or wait time:
+06:30 AM - 07:10 AM -> Time: 20 Minutes
+07:11 AM - 07:30 AM -> Time: 10 Minutes
+07:31 AM - 8:10 AM -> Time: 08 Minutes
+08:11 AM - 09:50 AM -> Time: 6/5 Minutes
+09:51 AM - 4:22 PM -> Time: 08 Minutes
+04:23 PM - 07:18 PM -> Time: 6/5 Minutes
+07:19 PM - 07:58 PM -> Time: 08 Minutes
+07:59 PM - 09:00 PM -> Time: 10 Minutes
+09:01 PM - 09:30 PM -> Time: 15 Minutes
+09:31 PM - 09:50 PM -> Time: 20 Minutes
+
+Motijheel > Uttara North:
+07:15 AM - 07:30 AM -> Time: 15 Minutes
+07:31 AM - 08:10 AM -> Time: 10 Minutes
+08:11 AM - 08:48 AM -> Time: 08 Minutes
+08:49 AM - 10:29 AM -> Time: 6/5 Minutes
+10:30 AM - 05:01 PM -> Time: 08 Minutes
+05:02 PM - 07:57 PM -> Time: 6/5 Minutes
+7:58 PM - 08:20 PM -> Time: 08 Minutes
+8:21 PM - 09:40 PM -> Time: 10 Minutes
+9:41 PM - 10:10 PM -> Time: 15 Minutes
+10:11 PM - 10:30 PM -> Time: 20 Minutes
+
+Note: Trains will depart from Motijheel Station Platform-01 until 3:00 PM; trains will depart from Motijheel Station Platform-02 from later times.
+
+
+Special Note: on each platform the train stays for 30 seconds.
+
+Dhaka Metro Map:
+<!-- Image Map Generated by http://www.image-map.net/ -->
+<img src="1-6.png.webp" usemap="#image-map">
+
+<map name="image-map">
+    <area target="" alt="Uttara North" title="Uttara North" href="" coords="224,63,25" shape="circle">
+    <area target="" alt="Uttara Center" title="Uttara Center" href="" coords="224,185,18" shape="circle">
+    <area target="" alt="Uttara South" title="Uttara South" href="" coords="224,325,18" shape="circle">
+    <area target="" alt="Pallabi" title="Pallabi" href="" coords="224,449,17" shape="circle">
+    <area target="" alt="Mirpur 11" title="Mirpur 11" href="" coords="225,588,17" shape="circle">
+    <area target="" alt="Mirpur 10" title="Mirpur 10" href="" coords="224,709,17" shape="circle">
+    <area target="" alt="Kazipara" title="Kazipara" href="" coords="225,857,18" shape="circle">
+    <area target="" alt="Shewrapara" title="Shewrapara" href="" coords="313,943,19" shape="circle">
+    <area target="" alt="Agargaon" title="Agargaon" href="" coords="313,1027,18" shape="circle">
+    <area target="" alt="Bijoy Sarani" title="Bijoy Sarani" href="" coords="312,1121,19" shape="circle">
+    <area target="" alt="Farmgate" title="Farmgate" href="" coords="401,1212,18" shape="circle">
+    <area target="" alt="Karwan Bazar" title="Karwan Bazar" href="" coords="400,1344,18" shape="circle">
+    <area target="" alt="Shahbagh" title="Shahbagh" href="" coords="402,1482,18" shape="circle">
+    <area target="" alt="Dhaka University" title="Dhaka University" href="" coords="490,1567,18" shape="circle">
+    <area target="" alt="Bangladesh Secretariat" title="Bangladesh Secretariat" href="" coords="600,1567,19" shape="circle">
+    <area target="" alt="Motijheel" title="Motijheel" href="" coords="690,1654,19" shape="circle">
+    <area target="" alt="Kamlapur" title="Kamlapur" href="" coords="754,1595,19" shape="circle">
+    <area target="" alt="Path" title="Path" href="" coords="223,64,223,183,222,324,223,448,223,587,223,706,226,852,312,943,313,1026,313,1122,399,1211,401,1345,402,1479,486,1567,597,1567,689,1658,755,1594,756,1595,690,1658,598,1568,487,1567,403,1479,401,1346,399,1210,313,1123,313,1027,312,943,226,853,223,706,224,588,224,448,223,324,223,183,223,65,222,65" shape="poly">
+</map>
+
+
+
+

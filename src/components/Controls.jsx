@@ -2,10 +2,32 @@ import { fmt12 } from '../simulation.js';
 
 const PRESETS = [[510, '8:30'], [780, '1:00 PM'], [1080, '6:00 PM'], [1305, '9:45 PM']];
 
-export default function Controls({ dayOverride, setDayOverride, nowMin, live, setLive, onScrub }) {
+export default function Controls({
+  dayOverride, setDayOverride, nowMin, live, setLive, onScrub,
+  locate, setLocate, geoError, myMarker,
+}) {
   return (
     <>
       <h3>View Controls</h3>
+      <div className="ctrl-row">
+        <label>My location</label>
+        <div className="btn-row">
+          <button
+            className={'btn live' + (locate ? '' : ' off')}
+            onClick={() => setLocate(!locate)}
+          >
+            {locate ? '◉ Locating…' : '📍 Show my location'}
+          </button>
+        </div>
+        {locate && geoError && <div className="geo-msg geo-err">{geoError}</div>}
+        {locate && !geoError && myMarker && (
+          <div className="geo-msg">
+            Between <b>{myMarker.stationA}</b> and <b>{myMarker.stationB}</b>
+            {myMarker.offRouteKm > 0.3 && <> · ~{myMarker.offRouteKm.toFixed(1)} km from the line</>}
+          </div>
+        )}
+        {locate && !geoError && !myMarker && <div className="geo-msg">Waiting for a GPS fix…</div>}
+      </div>
       <div className="ctrl-row">
         <label htmlFor="daySel">Schedule day</label>
         <select id="daySel" value={dayOverride} onChange={(e) => setDayOverride(e.target.value)}>
