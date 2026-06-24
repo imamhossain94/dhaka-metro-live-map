@@ -17,7 +17,7 @@
     --hairline:#DEDAD0;
     --grid-line:#E7E3D8;
     --highlight:#FFF3D6;
-    --radius:10px;
+    --radius:12px;
   }
 
   *{box-sizing:border-box;}
@@ -48,7 +48,11 @@
     border-radius:50%;
     background:radial-gradient(circle,rgba(255,255,255,0.06),transparent 70%);
   }
-  .header-inner{max-width:1180px;margin:0 auto;position:relative;z-index:1;}
+  .header-inner{max-width:1180px;margin:0 auto;position:relative;z-index:1;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;}
+  .top-link{color:#fff;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.35);
+    padding:9px 14px;border-radius:8px;white-space:nowrap;transition:background .15s;flex:none;}
+  .top-link:hover{background:rgba(255,255,255,.14);}
   .line-badge{
     display:inline-flex;align-items:center;gap:10px;
     background:var(--gold);
@@ -105,10 +109,11 @@
 
   /* ---------- FARE FINDER ---------- */
   .finder-card{
-    background:var(--teal-deep);
+    background:var(--paper-card);
+    border:1px solid var(--hairline);
     border-radius:var(--radius);
     padding:26px 24px;
-    color:#fff;
+    color:var(--ink);
   }
   .mode-tabs{
     display:flex;
@@ -117,9 +122,9 @@
     margin-bottom:22px;
   }
   .mode-tab{
-    background:rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.2);
-    color:rgba(255,255,255,0.85);
+    background:var(--paper);
+    border:1px solid var(--hairline);
+    color:var(--ink-soft);
     padding:9px 14px;
     border-radius:100px;
     font-size:13px;
@@ -129,24 +134,25 @@
     display:inline-flex;
     align-items:center;
     gap:7px;
-    transition:background .15s, color .15s;
+    transition:background .15s, color .15s, border-color .15s;
   }
-  .mode-tab:hover{background:rgba(255,255,255,0.16);}
+  .mode-tab:hover{border-color:var(--teal-deep);color:var(--ink);}
   .mode-tab.active{
-    background:var(--gold);
-    border-color:var(--gold);
-    color:var(--teal-deep);
+    background:var(--teal-deep);
+    border-color:var(--teal-deep);
+    color:#fff;
   }
   .mode-tab .tab-badge{
     font-size:10.5px;
     font-family:'IBM Plex Mono',monospace;
-    background:rgba(255,255,255,0.18);
+    background:var(--hairline);
+    color:var(--ink-soft);
     padding:1px 6px;
     border-radius:100px;
   }
   .mode-tab.active .tab-badge{
-    background:rgba(0,89,76,0.18);
-    color:var(--teal-deep);
+    background:rgba(255,255,255,0.2);
+    color:#fff;
   }
   .finder-grid{
     display:grid;
@@ -160,40 +166,40 @@
     font-size:11.5px;
     text-transform:uppercase;
     letter-spacing:0.06em;
-    color:rgba(255,255,255,0.7);
+    color:var(--ink-soft);
     margin-bottom:6px;
   }
   select{
     width:100%;
-    padding:11px 12px;
-    border-radius:7px;
-    border:1px solid rgba(255,255,255,0.25);
-    background:rgba(255,255,255,0.08);
-    color:#fff;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid var(--hairline);
+    background:var(--paper);
+    color:var(--ink);
     font-size:14.5px;
     font-family:inherit;
-    appearance:none;
   }
-  select option{color:#111;}
+  select:hover{border-color:var(--teal-deep);}
   .swap-btn{
     width:38px;height:38px;
     border-radius:50%;
-    border:1px solid rgba(255,255,255,0.3);
-    background:rgba(255,255,255,0.1);
-    color:#fff;
+    border:1px solid var(--hairline);
+    background:var(--paper);
+    color:var(--teal-deep);
     cursor:pointer;
     font-size:16px;
     display:flex;align-items:center;justify-content:center;
     align-self:center;
-    transition:background .15s;
+    transition:background .15s, color .15s;
   }
-  .swap-btn:hover{background:rgba(255,255,255,0.2);}
+  .swap-btn:hover{background:var(--teal-deep);color:#fff;border-color:var(--teal-deep);}
 
   .finder-result{
     margin-top:22px;
     display:flex;
     gap:0;
-    background:rgba(255,255,255,0.07);
+    background:var(--paper);
+    border:1px solid var(--hairline);
     border-radius:8px;
     overflow:hidden;
     flex-wrap:wrap;
@@ -202,11 +208,11 @@
     flex:1;
     min-width:120px;
     padding:16px 18px;
-    border-right:1px solid rgba(255,255,255,0.12);
+    border-right:1px solid var(--hairline);
   }
   .result-cell:last-child{border-right:none;}
-  .result-cell .v{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:700;color:var(--gold);}
-  .result-cell .l{font-size:11.5px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.05em;margin-top:3px;}
+  .result-cell .v{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:700;color:var(--teal-deep);}
+  .result-cell .l{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.05em;margin-top:3px;}
 
   /* ---------- MATRIX TABLE ---------- */
   .matrix-scroll{
@@ -244,8 +250,7 @@
   }
   table.fare-matrix tbody th{
     position:sticky;left:0;
-    background:#EFEAdd;
-    background:#EFEBDD;
+    background:var(--paper);
     color:var(--ink);
     font-weight:600;
     font-size:11.5px;
@@ -260,9 +265,8 @@
     color:var(--ink);
     cursor:default;
   }
-  table.fare-matrix td.diag{background:#DCD6C4;color:var(--ink-soft);}
+  table.fare-matrix td.diag{background:var(--paper);color:var(--ink-soft);}
   table.fare-matrix tr:nth-child(even) td{background:#FBFAF6;}
-  table.fare-matrix tr:nth-child(even) td.diag{background:#D6D0BC;}
   table.fare-matrix td.hl-row, table.fare-matrix td.hl-col{background:var(--highlight) !important;}
   table.fare-matrix td.hl-cell{
     background:var(--gold) !important;
@@ -312,8 +316,22 @@
   }
   footer p{margin:4px 0;}
 
+  .scroll-hint{display:none;font-size:11.5px;color:var(--ink-soft);margin:8px 2px 0;}
+
   @media (prefers-reduced-motion: reduce){
     *{transition:none !important;}
+  }
+
+  @media (max-width:760px){
+    .scroll-hint{display:block;}
+  }
+  @media (max-width:560px){
+    header{padding:22px 16px 20px;}
+    .wrap{padding:0 14px 48px;}
+    .section{margin-top:34px;}
+    .stat-row{gap:18px;}
+    .finder-card{padding:20px 16px;}
+    .route-card{padding:20px 14px 16px;}
   }
 </style>
 </head>
@@ -321,15 +339,18 @@
 
 <header>
   <div class="header-inner">
-    <span class="line-badge"><span class="dot"></span>MRT Line 6</span>
-    <h1>Fare &amp; Route Chart</h1>
-    <p class="subtitle">Uttara North → Motijheel · 16 stations · Dhaka Mass Rapid Transit</p>
-    <div class="stat-row">
-      <div class="stat"><div class="num">16</div><div class="lbl">Stations</div></div>
-      <div class="stat"><div class="num">37</div><div class="lbl">Min, end‑to‑end</div></div>
-      <div class="stat"><div class="num">19.05</div><div class="lbl">Km, total length</div></div>
-      <div class="stat"><div class="num">20–100</div><div class="lbl">BDT fare range</div></div>
+    <div>
+      <span class="line-badge"><span class="dot"></span>MRT Line 6</span>
+      <h1>Fare &amp; Route Chart</h1>
+      <p class="subtitle">Uttara North → Motijheel · 16 stations · Dhaka Mass Rapid Transit</p>
+      <div class="stat-row">
+        <div class="stat"><div class="num">16</div><div class="lbl">Stations</div></div>
+        <div class="stat"><div class="num">37</div><div class="lbl">Min, end‑to‑end</div></div>
+        <div class="stat"><div class="num">19.05</div><div class="lbl">Km, total length</div></div>
+        <div class="stat"><div class="num">20–100</div><div class="lbl">BDT fare range</div></div>
+      </div>
     </div>
+    <a class="top-link" href="/">← Live Map</a>
   </div>
 </header>
 
@@ -345,6 +366,7 @@
     <div class="route-card">
       <div id="routeSvgHolder"></div>
       <p class="route-hint"><b>Tip:</b> click a station on the line to set it as your "From" station in the fare finder.</p>
+      <p class="scroll-hint">→ Swipe to see all 16 stations</p>
     </div>
   </div>
 
@@ -383,6 +405,7 @@
       <h2>Full Fare Matrix</h2>
     </div>
     <p class="section-desc">All 256 station pairs, in BDT. Hover a cell to trace its row and column; the diagonal (same station) is shaded. Showing: <strong id="matrixModeLabel">Single Journey</strong> fares.</p>
+    <p class="scroll-hint">→ Swipe to see the full fare matrix</p>
     <div class="matrix-scroll">
       <table class="fare-matrix" id="fareTable"></table>
     </div>

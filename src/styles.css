@@ -66,6 +66,15 @@ h1{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.01em;margin:
 .card{background:var(--paper-card);border:1px solid var(--hairline);border-radius:var(--radius);}
 .map-card{padding:14px 10px;}
 
+.map-tabs{display:flex;gap:6px;margin:0 4px 10px;}
+.map-tab{font-family:inherit;font-size:12px;font-weight:600;padding:6px 12px;border-radius:100px;
+  border:1px solid var(--hairline);background:transparent;color:var(--ink-soft);cursor:pointer;}
+.map-tab.active{background:var(--teal-deep);color:#fff;border-color:var(--teal-deep);}
+
+.real-map-wrap{height:640px;border-radius:8px;overflow:hidden;}
+@media (max-width:860px){.real-map-wrap{height:420px;}}
+.train-marker{background:transparent;border:none;}
+
 .map-viewport{position:relative;}
 .map-viewport.cropped{aspect-ratio:4/3;overflow:hidden;border-radius:8px;cursor:grab;}
 .map-viewport.cropped svg{cursor:grab;}

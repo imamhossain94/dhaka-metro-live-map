@@ -134,7 +134,7 @@ export function interp(stops, e) {
   const fPos = moving ? easeInOutQuad(f) : f;
   return {
     x: a.x + (b.x - a.x) * fPos, y: a.y + (b.y - a.y) * fPos, angle: headingAt(stops, j),
-    prev: a.station, next: b.station, frac: f, dwell: !moving,
+    prev: a.station, next: b.station, frac: f, easedFrac: fPos, dwell: !moving,
   };
 }
 

@@ -6,6 +6,7 @@ import { projectToRoute, metersToPx } from './geo.js';
 import useGeolocation from './hooks/useGeolocation.js';
 import StatusBar from './components/StatusBar.jsx';
 import MetroMap from './components/MetroMap.jsx';
+import RealMap from './components/RealMap.jsx';
 import Controls from './components/Controls.jsx';
 import TrainList from './components/TrainList.jsx';
 import NextDepartures from './components/NextDepartures.jsx';
@@ -20,6 +21,7 @@ export default function App() {
   const [scrub, setScrub] = useState(480);
   const [now, setNow] = useState(() => dhakaNow());
   const [locate, setLocate] = useState(false);
+  const [mapView, setMapView] = useState('schematic');
   const { position: myPos, error: geoError } = useGeolocation(locate);
 
   // tick the clock 4×/sec
@@ -72,7 +74,13 @@ export default function App() {
       <div className="wrap">
         <div className="grid">
           <div className="card map-card">
-            <MetroMap southT={southT} northT={northT} myMarker={myMarker} />
+            <div className="map-tabs">
+              <button className={'map-tab' + (mapView === 'schematic' ? ' active' : '')} onClick={() => setMapView('schematic')}>Schematic</button>
+              <button className={'map-tab' + (mapView === 'real' ? ' active' : '')} onClick={() => setMapView('real')}>Real Map (OpenStreetMap)</button>
+            </div>
+            {mapView === 'schematic'
+              ? <MetroMap southT={southT} northT={northT} myMarker={myMarker} />
+              : <RealMap southT={southT} northT={northT} myPos={locate ? myPos : null} />}
           </div>
 
           <div className="side">

@@ -2,51 +2,35 @@
 // Projects a real-world GPS fix onto the schematic SVG map.
 // The map is drawn schematically (bends/lengths don't match true
 // geography), so instead of a single global transform we snap the
-// rider onto the nearest point of the *real* route polyline (built
-// from each station's approximate WGS84 coordinate), then carry that
-// same segment-index + fraction onto the matching schematic pixel
-// segment — the same interpolation the train icons already use.
-// This is an approximation for visualization, not survey-accurate.
+// rider onto the nearest point of the *real* route polyline — the
+// actual surveyed viaduct alignment from OpenStreetMap, not a rough
+// station-to-station chord — then carry that same arc-length fraction
+// onto the matching schematic pixel segment between the two bracketing
+// stations, the same interpolation the train icons already use.
 // ============================================================
 import { ORDER, COORDS } from './data.js';
+import { REAL_TRACK, REAL_BREAK } from './realRoute.js';
 
-// Approximate WGS84 coordinates of MRT-6 stations (public-domain estimates).
-export const GEO = {
-  'Uttara North': [23.8731, 90.3997],
-  'Uttara Center': [23.8640, 90.3998],
-  'Uttara South': [23.8554, 90.3998],
-  'Pallabi': [23.8401, 90.3994],
-  'Mirpur 11': [23.8298, 90.3954],
-  'Mirpur 10': [23.8067, 90.3686],
-  'Kazipara': [23.7972, 90.3712],
-  'Shewrapara': [23.7907, 90.3712],
-  'Agargaon': [23.7779, 90.3795],
-  'Bijoy Sarani': [23.7651, 90.3895],
-  'Farmgate': [23.7561, 90.3895],
-  'Karwan Bazar': [23.7508, 90.3927],
-  'Shahbagh': [23.7383, 90.3958],
-  'Dhaka University': [23.7322, 90.3956],
-  'Bangladesh Secretariat': [23.7280, 90.4072],
-  'Motijheel': [23.7332, 90.4172],
-};
-
-// published station-to-station distances (km), Uttara North -> Motijheel
-const SEG_KM = [1.21, 1.6, 2.2, 0.8, 1.2, 1.0, 1.0, 1.47, 1.4, 1.21, 1.14, 1.35, 0.87, 1.38, 1.22];
-
-const LAT0 = ORDER.reduce((s, n) => s + GEO[n][0], 0) / ORDER.length;
+const LAT0 = REAL_TRACK.reduce((s, p) => s + p[0], 0) / REAL_TRACK.length;
 const COS0 = Math.cos((LAT0 * Math.PI) / 180);
 const KM_PER_DEG = 111.32;
 const toUV = (lat, lon) => [lon * COS0 * KM_PER_DEG, lat * KM_PER_DEG]; // local planar km
 
-const REAL = ORDER.map((n) => toUV(...GEO[n]));
+const REAL = REAL_TRACK.map(([lat, lon]) => toUV(lat, lon));
 const PIX = ORDER.map((n) => COORDS[n]);
+const BREAK = ORDER.map((n) => REAL_BREAK[n]); // station index -> REAL_TRACK index
+
+// cumulative arc length (km) along the real track, for arc-length fractions
+const CUM = [0];
+for (let i = 1; i < REAL.length; i++) {
+  CUM.push(CUM[i - 1] + Math.hypot(REAL[i][0] - REAL[i - 1][0], REAL[i][1] - REAL[i - 1][1]));
+}
 
 // average pixel-per-km scale across the line, used to size the GPS accuracy ring
 const PX_PER_KM = (() => {
   let pxLen = 0;
   for (let i = 0; i < PIX.length - 1; i++) pxLen += Math.hypot(PIX[i + 1][0] - PIX[i][0], PIX[i + 1][1] - PIX[i][1]);
-  const kmLen = SEG_KM.reduce((a, b) => a + b, 0);
-  return pxLen / kmLen;
+  return pxLen / CUM[CUM.length - 1];
 })();
 
 // closest point on segment [a,b] to point p, all in the same planar units
@@ -60,8 +44,8 @@ function closestOnSegment(p, a, b) {
 }
 
 // Snap a GPS fix onto the schematic map by finding the nearest point on the
-// real-world route polyline, then mapping that same (segment, fraction) onto
-// the corresponding schematic pixel segment.
+// real-world route polyline, then mapping that same arc-length fraction onto
+// the corresponding schematic pixel segment between the bracketing stations.
 export function projectToRoute(lat, lon) {
   const p = toUV(lat, lon);
   let best = null;
@@ -69,14 +53,21 @@ export function projectToRoute(lat, lon) {
     const { t, dist } = closestOnSegment(p, REAL[i], REAL[i + 1]);
     if (!best || dist < best.dist) best = { i, t, dist };
   }
-  const [ax, ay] = PIX[best.i], [bx, by] = PIX[best.i + 1];
+  const targetKm = CUM[best.i] + best.t * (CUM[best.i + 1] - CUM[best.i]);
+
+  let s = 0;
+  while (s < BREAK.length - 2 && BREAK[s + 1] <= best.i) s++;
+  const kmA = CUM[BREAK[s]], kmB = CUM[BREAK[s + 1]];
+  const frac = kmB > kmA ? Math.max(0, Math.min(1, (targetKm - kmA) / (kmB - kmA))) : 0;
+
+  const [ax, ay] = PIX[s], [bx, by] = PIX[s + 1];
   return {
-    x: ax + (bx - ax) * best.t,
-    y: ay + (by - ay) * best.t,
+    x: ax + (bx - ax) * frac,
+    y: ay + (by - ay) * frac,
     offRouteKm: best.dist,
-    stationA: ORDER[best.i],
-    stationB: ORDER[best.i + 1],
-    t: best.t,
+    stationA: ORDER[s],
+    stationB: ORDER[s + 1],
+    t: frac,
   };
 }
 
