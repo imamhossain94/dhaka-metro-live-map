@@ -9,10 +9,13 @@ data, and a linked fare & route chart.
 
 ## Preview
 
-<p align="center">
-  <img src="preview/schematic_map.png" width="420" alt="Schematic map view" />
-  <img src="preview/real_map.png" width="420" alt="Real map view (OpenStreetMap)" />
-</p>
+<div align="center">
+
+<img src="preview/live_preview.gif" width="96%" alt="Live map walkthrough" />
+
+<img src="preview/schematic_map.png" width="48%" alt="Schematic map view" />  <img src="preview/real_map.png" width="48%" alt="Real map view (OpenStreetMap)" />
+
+</div>
 
 ## Features
 - **Schematic map** — dynamically drawn SVG, no image assets — with direction-aware
