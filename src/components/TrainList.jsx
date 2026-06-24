@@ -1,10 +1,10 @@
-import { TOTAL, fmt12 } from '../simulation.js';
+import { fmt12 } from '../simulation.js';
 
 function statusText(t, dirSouth) {
   const dest = dirSouth ? 'Motijheel' : 'Uttara North';
   let sb;
   if (t.e < 0.2) sb = 'Departing ' + t.prev;
-  else if (t.e > TOTAL - 0.2) sb = 'Arriving ' + dest;
+  else if (t.e > t.total - 0.2) sb = 'Arriving ' + dest;
   else if (t.dwell) sb = 'Stopped at ' + t.prev;
   else if (t.frac > 0.9) sb = 'Approaching ' + t.next;
   else sb = t.prev + ' → ' + t.next;

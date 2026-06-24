@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   dhakaNow, resolveDayType, getDeps, activeTrains, capFleet,
-  southStops, northStops,
 } from './simulation.js';
 import { projectToRoute, metersToPx } from './geo.js';
 import useGeolocation from './hooks/useGeolocation.js';
@@ -37,8 +36,8 @@ export default function App() {
   const dayType = useMemo(() => resolveDayType(now, dayOverride), [now.iso, now.dow, dayOverride]);
   const depSouth = useMemo(() => getDeps(dayType, 'south'), [dayType]);
   const depNorth = useMemo(() => getDeps(dayType, 'north'), [dayType]);
-  const southAll = useMemo(() => activeTrains(depSouth, southStops, nowMin), [depSouth, nowMin]);
-  const northAll = useMemo(() => activeTrains(depNorth, northStops, nowMin), [depNorth, nowMin]);
+  const southAll = useMemo(() => activeTrains(depSouth, 'south', nowMin), [depSouth, nowMin]);
+  const northAll = useMemo(() => activeTrains(depNorth, 'north', nowMin), [depNorth, nowMin]);
   const { south: southT, north: northT } = useMemo(
     () => capFleet(southAll, northAll, MAX_FLEET), [southAll, northAll]
   );
@@ -108,7 +107,7 @@ export default function App() {
         </div>
 
         <footer>
-          <p><b>How positions are estimated:</b> trains are simulated from the official MRT-6 timetable (first/last train + headway bands) and the published station-to-station running times. Each train glides between stations in proportion to its scheduled segment time and pauses 30&nbsp;seconds at every platform (~44&nbsp;min end-to-end). This is a schedule-based estimate, not live GPS.</p>
+          <p><b>How positions are estimated:</b> trains are simulated from the official MRT-6 timetable (first/last train + headway bands) and the published station-to-station running times, with an ease-in/ease-out glide between platforms to mimic real acceleration/braking. Dwell time at each platform varies ~30–60&nbsp;seconds (longer during the ~8–10am and ~5–7pm rush). This is a schedule-based estimate, not live GPS.</p>
           <p>Time source: your device clock converted to <b>Bangladesh Standard Time (UTC+6, no DST)</b>. Use the controls to preview any time of day or another day&rsquo;s schedule. Govt-holiday auto-detection uses fixed-date national holidays only — add Eid/lunar dates in the <code>HOLIDAYS</code> set in <code>src/data.js</code>.</p>
         </footer>
       </div>

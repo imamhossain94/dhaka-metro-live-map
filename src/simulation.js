@@ -4,12 +4,37 @@
 // ============================================================
 import { ORDER, SEG, COORDS, SCHEDULES, HOLIDAYS } from './data.js';
 
-export const DWELL = 0.5; // minutes a train holds at every intermediate platform (30s)
+const REV_ORDER = [...ORDER].reverse();
+const REV_SEG = [...SEG].reverse();
 
-// Build elapsed-from-departure -> point events for one direction.
+// Real-world platform dwell is ~30s off-peak, up to ~60s in rush when more
+// riders are boarding/alighting. Deterministic (seeded from the absolute
+// clock minute + station index) so a given trip's schedule stays stable
+// across re-renders instead of jittering every tick.
+function isRushMinute(absMin) {
+  const m = ((Math.floor(absMin) % 1440) + 1440) % 1440;
+  return (m >= 480 && m < 600) || (m >= 1020 && m < 1140); // ~8–10am, ~5–7pm
+}
+function hash01(a, b) {
+  const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+function dwellMinutes(absMin, stationIdx) {
+  const rush = isRushMinute(absMin);
+  const lo = rush ? 0.75 : 0.5;  // 45s : 30s
+  const hi = rush ? 1.0 : 0.75;  // 60s : 45s
+  return lo + hash01(Math.floor(absMin), stationIdx) * (hi - lo);
+}
+
+// worst-case trip length (every dwell at its max) — used only to pre-filter
+// which departures are worth building a full per-trip stop table for
+const TOTAL_MAX = SEG.reduce((a, b) => a + b, 0) + (ORDER.length - 2) * 1.0;
+
+// Build elapsed-from-departure -> point events for one specific trip.
 // Intermediate platforms get two events (arrival + departure) at the same
-// point, so the train sits still for DWELL minutes.
-export function buildStops(order, seg) {
+// point, with a rush-aware dwell between them — each trip gets its own
+// table since dwell depends on the absolute clock time of that arrival.
+export function buildTripStops(dep, order, seg) {
   const stops = [];
   let e = 0;
   const c0 = COORDS[order[0]];
@@ -19,16 +44,12 @@ export function buildStops(order, seg) {
     const c = COORDS[order[i]];
     stops.push({ e, x: c[0], y: c[1], station: order[i] });
     if (i < order.length - 1) { // dwell at intermediate platform
-      e += DWELL;
+      e += dwellMinutes(dep + e, i);
       stops.push({ e, x: c[0], y: c[1], station: order[i] });
     }
   }
   return stops;
 }
-
-export const southStops = buildStops(ORDER, SEG);
-export const northStops = buildStops([...ORDER].reverse(), [...SEG].reverse());
-export const TOTAL = southStops[southStops.length - 1].e; // 37 running + 14×0.5 dwell = 44
 
 // ---- time helpers ----
 export const pad = (n) => String(n).padStart(2, '0');
@@ -61,7 +82,7 @@ export function serviceWindow(dayType) {
   const sc = SCHEDULES[dayType];
   return {
     start: Math.min(sc.south.first, sc.north.first),
-    end: Math.max(sc.south.last, sc.north.last) + TOTAL,
+    end: Math.max(sc.south.last, sc.north.last) + TOTAL_MAX,
   };
 }
 
@@ -97,23 +118,37 @@ function headingAt(stops, j) {
   return 0;
 }
 
+// ease-in/out so a train visibly accelerates leaving a platform and brakes
+// into the next one, instead of gliding at constant speed
+function easeInOutQuad(t) {
+  return t < 0.5 ? 2 * t * t : 1 - ((-2 * t + 2) ** 2) / 2;
+}
+
 export function interp(stops, e) {
   let j = stops.length - 2;
   if (e <= stops[0].e) j = 0;
   else for (let k = 0; k < stops.length - 1; k++) { if (e <= stops[k + 1].e + 1e-9) { j = k; break; } }
   const a = stops[j], b = stops[j + 1];
   const f = (b.e - a.e) > 1e-9 ? (e - a.e) / (b.e - a.e) : 0;
+  const moving = a.station !== b.station;
+  const fPos = moving ? easeInOutQuad(f) : f;
   return {
-    x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, angle: headingAt(stops, j),
-    prev: a.station, next: b.station, frac: f, dwell: (a.station === b.station),
+    x: a.x + (b.x - a.x) * fPos, y: a.y + (b.y - a.y) * fPos, angle: headingAt(stops, j),
+    prev: a.station, next: b.station, frac: f, dwell: !moving,
   };
 }
 
-export function activeTrains(deps, stops, nowMin) {
+export function activeTrains(deps, dir, nowMin) {
+  const order = dir === 'south' ? ORDER : REV_ORDER;
+  const seg = dir === 'south' ? SEG : REV_SEG;
   const out = [];
   for (const d of deps) {
+    const rough = nowMin - d;
+    if (rough < -1 || rough > TOTAL_MAX + 1) continue;
+    const stops = buildTripStops(d, order, seg);
+    const total = stops[stops.length - 1].e;
     const e = nowMin - d;
-    if (e >= 0 && e <= TOTAL) out.push({ dep: d, e, ...interp(stops, e) });
+    if (e >= 0 && e <= total) out.push({ dep: d, e, total, ...interp(stops, e) });
   }
   return out;
 }
